@@ -146,7 +146,7 @@ public class RegistrationTest {
         if(driver != null) driver.quit();
         if(httpServer != null){
             // Keep server alive for a short grace period so CI probes can hit /status after tests finish.
-            int grace = 3; // seconds
+            int grace = 5; // seconds (increased default to give CI probe more time)
             try{
                 String g = System.getenv("SERVER_GRACE_SECONDS");
                 if(g != null) grace = Integer.parseInt(g);

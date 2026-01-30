@@ -36,7 +36,7 @@ jobs:
       - name: Run Maven tests
         working-directory: ./registration-form/automation
         env:
-          SERVER_GRACE_SECONDS: '3'
+          SERVER_GRACE_SECONDS: '5'
         run: mvn -B test
 
       - name: Ensure artifact directories exist
