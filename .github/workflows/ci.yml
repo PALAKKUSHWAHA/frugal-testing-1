@@ -34,13 +34,10 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Run Maven tests
+        working-directory: registration-form/automation
         env:
           SERVER_GRACE_SECONDS: '5'
-        run: |
-          echo "Listing registration-form/automation contents for debugging"
-          ls -la registration-form/automation || true
-          echo "Running mvn -f registration-form/automation/pom.xml test"
-          mvn -B -f registration-form/automation/pom.xml test
+        run: mvn -B test
 
       - name: Ensure artifact directories exist
         if: always()
