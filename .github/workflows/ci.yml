@@ -35,6 +35,8 @@ jobs:
 
       - name: Run Maven tests
         working-directory: ./registration-form/automation
+        env:
+          SERVER_GRACE_SECONDS: '3'
         run: mvn -B test
 
       - name: Ensure artifact directories exist
@@ -52,8 +54,17 @@ jobs:
             echo "Found server URL:";
             cat target/server-url.txt;
             URL=$(cat target/server-url.txt);
-            echo "Attempting to curl $URL/status (may fail if server has already stopped)...";
-            curl --max-time 2 -sS "$URL/status" || echo "curl failed or timed out"
+            echo "Attempting to curl $URL/status (retrying up to 3 times)...";
+            ok=1
+            for i in 1 2 3; do
+              if curl --max-time 2 -sS "$URL/status" | grep -q '^OK$'; then
+                echo "Status OK on attempt $i";
+                ok=0; break;
+              fi
+              echo "Attempt $i failed, sleeping 1s";
+              sleep 1;
+            done
+            if [ "$ok" -ne 0 ]; then echo "All attempts failed"; fi
           else
             echo "No server-url.txt present (server may not have started or file write failed)"
           fi

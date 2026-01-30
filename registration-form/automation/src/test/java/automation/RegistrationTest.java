@@ -144,7 +144,19 @@ public class RegistrationTest {
     @AfterAll
     public static void tearDownClass(){
         if(driver != null) driver.quit();
-        if(httpServer != null) httpServer.stop(0);
+        if(httpServer != null){
+            // Keep server alive for a short grace period so CI probes can hit /status after tests finish.
+            int grace = 3; // seconds
+            try{
+                String g = System.getenv("SERVER_GRACE_SECONDS");
+                if(g != null) grace = Integer.parseInt(g);
+            } catch(Exception ignored){ }
+            System.out.println("Keeping server alive for " + grace + " seconds before shutdown (SERVER_GRACE_SECONDS=" + grace + ")");
+            try{
+                Thread.sleep(grace * 1000L);
+            } catch(InterruptedException ignored){ }
+            httpServer.stop(0);
+        }
     }
 
     @BeforeEach
