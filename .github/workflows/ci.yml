@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Google Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.m2/settings.xml
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Run Maven tests
+        working-directory: ./registration-form/automation
+        run: mvn -B test
+
+      - name: Ensure artifact directories exist
+        if: always()
+        run: |
+          mkdir -p registration-form/screenshots
+          mkdir -p registration-form/automation/target/surefire-reports
+          touch registration-form/screenshots/.gitkeep || true
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            registration-form/screenshots/**
+            registration-form/automation/target/surefire-reports/**
+            registration-form/automation/target/*.dump
+            registration-form/automation/target/*.dumpstream
+            registration-form/automation/target/surefire-reports/*.txt
+            registration-form/automation/target/surefire-reports/*.xml
