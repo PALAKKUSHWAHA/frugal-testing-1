@@ -44,6 +44,20 @@ jobs:
           mkdir -p registration-form/automation/target/surefire-reports
           touch registration-form/screenshots/.gitkeep || true
 
+      - name: Show server URL & probe status
+        if: always()
+        working-directory: ./registration-form/automation
+        run: |
+          if [ -f target/server-url.txt ]; then
+            echo "Found server URL:";
+            cat target/server-url.txt;
+            URL=$(cat target/server-url.txt);
+            echo "Attempting to curl $URL/status (may fail if server has already stopped)...";
+            curl --max-time 2 -sS "$URL/status" || echo "curl failed or timed out"
+          else
+            echo "No server-url.txt present (server may not have started or file write failed)"
+          fi
+
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
