@@ -33,6 +33,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
+      - name: Debug: list repository and show git status
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Listing root (top-level)";
+          ls -la || true
+          echo "Listing registration-form (recursive up to 3 levels)";
+          if [ -d registration-form ]; then find registration-form -maxdepth 3 -ls || true; else echo "registration-form directory missing"; fi
+          echo "Git HEAD:"; git rev-parse --verify HEAD || true
+          echo "Git status (porcelain):"; git status --porcelain || true
+
       - name: Run Maven tests
         working-directory: registration-form/automation
         env:
